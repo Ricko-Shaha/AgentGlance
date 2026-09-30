@@ -1,6 +1,6 @@
 # Installation
 
-This guide describes AgentGlance **2.1.2**. Start with the [project overview](../README.md), then see [Using AgentGlance](USAGE.md) for the controls.
+This guide describes AgentGlance **2.1.3**. Start with the [project overview](../README.md), then see [Using AgentGlance](USAGE.md) for the controls.
 
 ## Choose a package
 
@@ -20,7 +20,7 @@ Windows builds currently have no publisher certificate. macOS builds use an ad-h
 
 ### Installer — recommended for Claude telemetry
 
-1. Run `AgentGlance-Setup-2.1.2-x64.exe`.
+1. Run `AgentGlance-Setup-2.1.3-x64.exe`.
 2. Choose the installation location in the setup wizard. Setup uses a per-user installation and is configured to create desktop and Start-menu shortcuts.
 3. Open **AgentGlance** from one of those shortcuts.
 
@@ -28,7 +28,7 @@ Keep the installed application at that location if you connect Claude telemetry.
 
 ### Portable app
 
-1. Place `AgentGlance-2.1.2.exe` in a folder you intend to keep.
+1. Place `AgentGlance-2.1.3.exe` in a folder you intend to keep.
 2. Open it directly. You may create a Windows shortcut to that EXE yourself.
 
 The portable package does not run an installation wizard or create shortcuts automatically. It can display detected accounts, activity, and available usage. **Connect Claude** requires the installed app because the portable launcher does not provide a persistent worker location. An already configured telemetry bridge may still supply observations.
@@ -73,6 +73,8 @@ Start AgentGlance under the same operating-system user as those assistants. If y
 2. Open **Info → Claude telemetry → Connect Claude**.
 3. Resume normal work in Claude. Usage, context, and activity arrive as Claude emits new status-line and hook events. Reopen a Claude session if it has not loaded the new settings.
 
+Info distinguishes saved configuration from received data: **Configured** alone does not mean an update has arrived. It shows the latest received timestamp and whether Claude included usage limits and context. Use an interactive Claude session; `claude -p` does not run a status line. See [Troubleshooting](TROUBLESHOOTING.md#connect-claude-is-unavailable-or-telemetry-stays-empty) if it remains empty.
+
 This installs local observers using the bundled worker. It preserves an existing status-line command's input/output and adds activity hooks alongside existing hooks. It does not sign you in, submit a prompt, or decide permission requests. An already working legacy connection is recognized and preserved. Read [Privacy](PRIVACY.md) for what is observed and stored.
 
 ## Updating and removing AgentGlance
@@ -80,6 +82,8 @@ This installs local observers using the bundled worker. It preserves an existing
 There is no automatic updater. Before replacing, moving, or removing a connected installation, use **Info → Claude telemetry → Disconnect Claude** while that installation still runs. This avoids leaving Claude settings pointing at a missing executable. Then choose **Quit AgentGlance** from the tray menu; closing the widget normally only hides it.
 
 For Windows, run the newer installer, or replace the portable EXE and update any shortcut you created to point at the new filename. For macOS, replace the application in Applications. For Linux, update the installed package through your package manager, or replace the AppImage. Launch the new version and reconnect Claude telemetry if needed. Do not keep launching an old shortcut after replacing a versioned portable filename.
+
+If you already moved a connected installation, the new copy can offer **Info → Claude telemetry → Repair connection** to update its owned worker paths. This preserves the original status-line command and unrelated hooks. Restart Claude Code after repairing.
 
 To uninstall, disconnect first and quit. Remove the Windows installation through **Installed apps**, remove the macOS app from Applications, or remove the Linux package through your package manager. Portable EXEs and AppImages can be removed directly after quitting.
 
@@ -89,7 +93,7 @@ For a hidden window, missing measurements, or setup errors, continue to [Trouble
 
 ## Upgrading from Statusline
 
-The application was renamed in AgentGlance 2.1.0. Current Windows packages are `AgentGlance-2.1.2.exe` and `AgentGlance-Setup-2.1.2-x64.exe`. Update manually created shortcuts to the new executable; an old Statusline shortcut can still launch an older copy.
+The application was renamed in AgentGlance 2.1.0. Current Windows packages are `AgentGlance-2.1.3.exe` and `AgentGlance-Setup-2.1.3-x64.exe`. Update manually created shortcuts to the new executable; an old Statusline shortcut can still launch an older copy.
 
 When no AgentGlance preferences exist, the app reads the previous `Statusline/preferences.json` from the operating system's application-data directory. Subsequent preference changes are saved under AgentGlance. Existing Claude integration settings are not moved by this preference import.
 

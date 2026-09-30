@@ -44,6 +44,7 @@ let windowDrag;
 let taskContextOpen = false;
 let detailsOpen = false;
 let verticalRailHeight = 240;
+let panelAnchor;
 
 function horizontalHeight() {
   return (taskContextOpen ? 292 : 44) + (detailsOpen ? 288 : 0);
@@ -56,10 +57,15 @@ function verticalWidth() {
 function resizePanels() {
   if (nativeWayland || !mainWindow || mainWindow.isDestroyed()) return;
   const current = mainWindow.getBounds();
+  const expanded = taskContextOpen || detailsOpen;
+  // Expansion may temporarily shift away from a screen edge. Keep the compact
+  // position until every panel closes, including when switching between panels.
+  if (expanded && !panelAnchor) panelAnchor = { ...current };
   const size = preferences.layout === 'horizontal' ? { height: horizontalHeight() } : { width: verticalWidth(), height: verticalRailHeight };
-  if (Object.entries(size).every(([key, value]) => current[key] === value)) return;
-  // Keep the rail's left edge fixed unless the current display needs more room.
-  mainWindow.setBounds(boundedSize({ ...current, ...size }, current), true);
+  const anchor = panelAnchor || current;
+  const next = boundedSize({ ...current, x: anchor.x, y: anchor.y, ...size }, anchor);
+  if (!expanded) panelAnchor = undefined;
+  if (Object.keys(next).some(key => current[key] !== next[key])) mainWindow.setBounds(next);
 }
 
 function dragPoint(value) {
@@ -131,11 +137,18 @@ function keepWindowInWorkArea() {
 }
 
 function finishWindowDrag() {
-  const wasDragging = Boolean(windowDrag);
+  const drag = windowDrag;
   windowDrag = undefined;
   // Keep movement free between displays; only settle inside the desktop on drop.
   // Topmost windows can still be obscured by the system taskbar or Dock.
-  if (wasDragging) keepWindowInWorkArea();
+  if (drag) {
+    keepWindowInWorkArea();
+    if (panelAnchor && mainWindow && !mainWindow.isDestroyed()) {
+      const dropped = mainWindow.getBounds();
+      panelAnchor.x += dropped.x - drag.bounds.x;
+      panelAnchor.y += dropped.y - drag.bounds.y;
+    }
+  }
 }
 
 function setCompact(value) {
@@ -149,8 +162,10 @@ function setLayout(value) {
   const current = mainWindow.getBounds();
   const width = value === 'vertical' ? verticalWidth() : 560;
   const height = value === 'vertical' ? verticalRailHeight : horizontalHeight();
+  const anchor = boundedSize({ ...(panelAnchor || current), width: value === 'vertical' ? 44 : 560, height: value === 'vertical' ? verticalRailHeight : 44 });
+  panelAnchor = taskContextOpen || detailsOpen ? anchor : undefined;
   mainWindow.setMinimumSize(value === 'vertical' ? 44 : 360, value === 'vertical' ? 240 : 44);
-  mainWindow.setBounds(boundedSize({ x: current.x, y: current.y, width, height }, current), true);
+  mainWindow.setBounds(boundedSize({ x: anchor.x, y: anchor.y, width, height }, anchor));
   preferences.layout = value;
   preferences.compact = true;
   savePreferences();

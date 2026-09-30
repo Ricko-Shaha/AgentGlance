@@ -54,6 +54,8 @@ Process count and observed session count measure different things. Historical or
 
 In a stable installed copy, open **Info → Claude telemetry → Connect Claude**. This preserves existing status-line commands and adds local activity hooks. New observations arrive when Claude next emits relevant events; reopen a session if it has not reloaded settings. No separate Node installation is needed for the bundled worker.
 
+**Configured** confirms saved settings. **Receiving status-line updates** confirms recent data, with its timestamp and whether usage limits and context were reported. **Last update** indicates an older observation. These diagnostics refresh every five seconds while Info is open. Use an interactive Claude session; `claude -p` does not emit status-line updates. If you move the installed app, **Repair connection** updates its owned command paths when needed.
+
 Portable Windows builds and Linux AppImages cannot install this connection. Use an installed package instead. Existing working legacy connections are recognized. Disconnect before moving or removing the installed application; see [Installation](INSTALLATION.md#updating-and-removing-agentglance).
 
 If a provider or measurement is missing, start with [Troubleshooting](TROUBLESHOOTING.md). For what the app reads and stores, see [Privacy](PRIVACY.md).

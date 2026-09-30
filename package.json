@@ -1,6 +1,6 @@
 {
   "name": "agentglance",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "private": true,
   "description": "A floating traffic-signal widget for AI usage and context.",
   "author": "Ricko-Shaha",

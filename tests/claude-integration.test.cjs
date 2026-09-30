@@ -52,6 +52,71 @@ test('setup and repeated setup are idempotent without an existing status line', 
   assert.deepEqual(await f.read(), { permissions: { allow: ['Read'] } });
 });
 
+test('moved app reports a repairable connection and preserves original commands through repair/disconnect', async t => {
+  const initial = { statusLine: { type: 'command', command: 'echo original', padding: 2 }, hooks: { Stop: [{ hooks: [{ type: 'command', command: 'echo retained' }] }] } };
+  const f = await fixture(t, initial);
+  await connectIntegration(f.options);
+  const moved = { ...f.options, executablePath: path.join(f.home, 'new app', 'electron') };
+  const before = await getIntegrationStatus(moved);
+  assert.equal(before.installed, true);
+  assert.equal(before.needsRepair, true);
+  const repaired = await connectIntegration(moved);
+  assert.equal(repaired.needsRepair, false);
+  const settings = await f.read();
+  assert.equal(settings.statusLine.command, workerCommand('usage', f.config, moved));
+  const oldCommand = workerCommand('activity', f.config, f.options);
+  const newCommand = workerCommand('activity', f.config, moved);
+  for (const event of EVENTS) {
+    const hooks = settings.hooks[event].flatMap(group => group.hooks);
+    assert.equal(hooks.filter(hook => hook.command === oldCommand).length, 0);
+    assert.equal(hooks.filter(hook => hook.command === newCommand).length, 1);
+  }
+  await disconnectIntegration(moved);
+  assert.deepEqual(await f.read(), initial);
+});
+
+test('repair preserves user edits to the installed status line', async t => {
+  const f = await fixture(t);
+  await connectIntegration(f.options);
+  const edited = await f.read();
+  edited.statusLine.padding = 8;
+  await fs.writeFile(path.join(f.config, 'settings.json'), JSON.stringify(edited));
+  const moved = { ...f.options, executablePath: path.join(f.home, 'moved', 'electron') };
+  await assert.rejects(connectIntegration(moved), /edited after setup/);
+  assert.deepEqual(await f.read(), edited);
+});
+
+test('configured telemetry reports actual receipt, field availability, and staleness without payloads', async t => {
+  const f = await fixture(t);
+  const connected = await connectIntegration(f.options);
+  assert.equal(connected.installed, true);
+  assert.deepEqual(connected.telemetry, { updatedAt: null, hasLimits: false, hasContext: false, stale: false });
+  const now = Date.now();
+  await runClaudeWorker(['usage', '--config', f.config], { now, stdin: Readable.from([JSON.stringify({ session_id: 'private-session', prompt: 'private prompt', rate_limits: { five_hour: { used_percentage: 0 } }, context_window: { used_percentage: 0 } })]), stdout: output().stream });
+  const fresh = await getIntegrationStatus({ ...f.options, now });
+  assert.deepEqual(fresh.telemetry, { updatedAt: new Date(now).toISOString(), hasLimits: true, hasContext: true, stale: false });
+  assert.equal(JSON.stringify(fresh).includes('private-session'), false);
+  assert.equal(JSON.stringify(fresh).includes('private prompt'), false);
+  assert.equal((await getIntegrationStatus({ ...f.options, now: now + 300001 })).telemetry.stale, true);
+  await runClaudeWorker(['usage', '--config', f.config], { now, stdin: Readable.from(['{}']), stdout: output().stream });
+  assert.deepEqual((await getIntegrationStatus({ ...f.options, now })).telemetry, { updatedAt: new Date(now).toISOString(), hasLimits: false, hasContext: false, stale: false });
+  const capture = path.join(f.config, 'statusline-usage', 'latest.json');
+  await fs.writeFile(capture, JSON.stringify({ schemaVersion: 1, limits: [], updatedAt: new Date(now + 120000).toISOString() }));
+  assert.equal((await getIntegrationStatus({ ...f.options, now })).telemetry.updatedAt, null);
+  await fs.writeFile(capture, '{invalid');
+  assert.equal((await getIntegrationStatus(f.options)).telemetry.updatedAt, null);
+});
+
+test('macOS translocated app cannot install temporary worker commands', async t => {
+  const f = await fixture(t, { keep: true });
+  const options = { ...f.options, platform: 'darwin', executablePath: '/private/var/folders/test/AppTranslocation/random/d/AgentGlance.app/Contents/MacOS/AgentGlance' };
+  const status = await getIntegrationStatus(options);
+  assert.equal(status.canConnect, false);
+  assert.match(status.reason, /Applications/);
+  await assert.rejects(connectIntegration(options), /temporary macOS location/);
+  assert.deepEqual(await f.read(), { keep: true });
+});
+
 test('signed-out and portable installs do not change settings or create manifests', async t => {
   const f = await fixture(t, { keep: true }, false);
   assert.equal((await getIntegrationStatus(f.options)).signedIn, false);

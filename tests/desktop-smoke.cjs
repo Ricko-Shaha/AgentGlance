@@ -135,6 +135,49 @@ const root = path.resolve(__dirname, '..');
     await expect.poll(async () => (await bounds()).height).toBe(332);
     await page.getByTitle('Close signal guide').click();
     await expect.poll(async () => (await bounds()).height).toBe(44);
+    // Opening near an edge temporarily moves the window to fit its drawer.
+    // Every close path must restore the original compact position, without drift.
+    for (const layout of ['horizontal', 'vertical']) {
+      if (layout === 'vertical') {
+        await page.getByTitle('Vertical layout', { exact: true }).click();
+        await expect.poll(async () => (await bounds()).width).toBe(44);
+      }
+      await desktop.evaluate(({ BrowserWindow, screen }) => {
+        const win = BrowserWindow.getAllWindows()[0];
+        const b = win.getBounds();
+        const area = screen.getDisplayMatching(b).workArea;
+        win.setPosition(area.x + area.width - b.width - 12, area.y + area.height - b.height - 12);
+      });
+      const compactAnchor = await bounds();
+      for (let cycle = 0; cycle < 2; cycle++) {
+        await page.getByTestId('task-context-toggle').first().click();
+        await expect.poll(async () => (await bounds())[layout === 'vertical' ? 'width' : 'height']).toBe(layout === 'vertical' ? 360 : 292);
+        assert.ok(layout === 'vertical' ? (await bounds()).x < compactAnchor.x : (await bounds()).y < compactAnchor.y, 'The edge should force an expanded panel inward');
+        await page.getByTestId('usage-meter').first().click();
+        await expect.poll(async () => (await bounds())[layout === 'vertical' ? 'width' : 'height']).toBe(layout === 'vertical' ? 360 : 580);
+        await page.getByTitle('Close details').click();
+        if (layout === 'horizontal') await page.getByTestId('task-context-toggle').first().click();
+        await expect.poll(bounds).toEqual(compactAnchor);
+        await page.getByTitle('How to read the signals').click();
+        await expect.poll(async () => (await bounds())[layout === 'vertical' ? 'width' : 'height']).toBe(layout === 'vertical' ? 360 : 332);
+        await page.keyboard.press('Escape');
+        await expect.poll(bounds).toEqual(compactAnchor);
+      }
+      // Dragging an open panel should move the remembered compact position too.
+      await page.getByTestId('usage-meter').first().click();
+      await expect.poll(async () => (await bounds())[layout === 'vertical' ? 'width' : 'height']).toBe(layout === 'vertical' ? 360 : 332);
+      const expandedBeforeDrag = await bounds();
+      await page.evaluate(async () => {
+        await window.statusline.startWindowDrag({ x: 100, y: 100 });
+        await window.statusline.moveWindowDrag({ x: 80, y: 80 });
+        await window.statusline.endWindowDrag();
+      });
+      const expandedAfterDrag = await bounds();
+      await page.keyboard.press('Escape');
+      await expect.poll(bounds).toEqual({ ...compactAnchor, x: compactAnchor.x + expandedAfterDrag.x - expandedBeforeDrag.x, y: compactAnchor.y + expandedAfterDrag.y - expandedBeforeDrag.y });
+    }
+    await page.getByTitle('Horizontal layout', { exact: true }).click();
+    await expect.poll(async () => (await bounds()).height).toBe(44);
     for (const value of [false, true]) {
       await page.getByTitle('Always on top', { exact: true }).click();
       assert.equal(await desktop.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].isAlwaysOnTop()), value);

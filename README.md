@@ -2,7 +2,7 @@
 
 A small floating desktop widget for the AI assistants you use. See activity, account usage and reset countdowns in a **44-pixel toolbar**, then expand an assistant to inspect context for individual tasks.
 
-Version **2.1.2** · [Ricko-Shaha/AgentGlance on GitHub](https://github.com/Ricko-Shaha/AgentGlance)
+Version **2.1.3** · [Ricko-Shaha/AgentGlance on GitHub](https://github.com/Ricko-Shaha/AgentGlance)
 
 ![Compact widget with example Codex and Claude data](docs/images/toolbar.png)
 

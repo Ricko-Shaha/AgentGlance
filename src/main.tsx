@@ -44,7 +44,7 @@ type Preferences = { compact: boolean; alwaysOnTop: boolean; layout?: Layout };
 
 type Capabilities = { manualDrag: boolean; layouts: boolean; pin: boolean; message: string | null };
 
-type ClaudeIntegration = { signedIn: boolean; installed: boolean; usageConnected: boolean; activityConnected: boolean; legacy: boolean; canConnect: boolean; canDisconnect: boolean; reason: string | null };
+type ClaudeIntegration = { signedIn: boolean; installed: boolean; usageConnected: boolean; activityConnected: boolean; legacy: boolean; canConnect: boolean; canDisconnect: boolean; reason: string | null; needsRepair?: boolean; telemetry?: { updatedAt: string | null; hasLimits: boolean; hasContext: boolean; stale: boolean } };
 
 declare global { interface Window { statusline?: { getCapabilities?(): Promise<Capabilities>; getClaudeIntegration?(): Promise<ClaudeIntegration>; connectClaude?(): Promise<ClaudeIntegration>; disconnectClaude?(): Promise<ClaudeIntegration>; getSnapshot(): Promise<Snapshot>; subscribe(callback: (snapshot: Snapshot) => void): () => void; refresh(): Promise<Snapshot>; setCompact(value: boolean): Promise<void> | void; setLayout?(value: Layout): Promise<void>; setDetailsOpen?(value: boolean): Promise<void>; setTaskContextOpen?(value: boolean): Promise<void>; setRailHeight?(value: number): Promise<void>; setAlwaysOnTop(value: boolean): Promise<void> | void; startWindowDrag(point: { x: number; y: number }): Promise<void>; moveWindowDrag(point: { x: number; y: number }): Promise<void>; endWindowDrag(): Promise<void>; minimize(): void; close(): void; getPreferences(): Promise<Preferences>; openProvider(id: string): Promise<void> } } }
 
@@ -66,9 +66,21 @@ function ClaudeConnection() {
 
     let alive = true;
 
-    bridge?.getClaudeIntegration?.().then(value => { if (alive) setStatus(value); }).catch(() => { if (alive) setError('Could not read Claude integration settings.'); });
+    let checking = false;
+    const refresh = async () => {
+      if (checking || !bridge?.getClaudeIntegration) return;
+      checking = true;
+      try {
+        const value = await bridge.getClaudeIntegration();
+        if (alive) { setStatus(value); setError(previous => previous === 'Could not read Claude integration settings.' ? '' : previous); }
+      }
+      catch { if (alive) setError('Could not read Claude integration settings.'); }
+      finally { checking = false; }
+    };
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), 5000);
 
-    return () => { alive = false; };
+    return () => { alive = false; window.clearInterval(timer); };
 
   }, []);
 
@@ -96,13 +108,17 @@ function ClaudeConnection() {
 
     {status ? <>
 
-      <p>{status.usageConnected && status.activityConnected ? 'Connected. New Claude sessions report usage, context, and activity automatically.' : 'Connect Claude to report usage, context, and activity. This adds local status-line and activity hooks to your Claude settings and preserves your existing commands.'}</p>
+      <p>{status.needsRepair ? 'The connection points to a different app location. Repair it to use this installed copy, then restart Claude Code.' : status.usageConnected && status.activityConnected ? status.telemetry?.updatedAt ? `Configured. ${status.telemetry.stale ? 'Last update' : 'Receiving status-line updates'}: ${timestamp(status.telemetry.updatedAt)}.` : 'Configured, but no status-line update received yet. Restart your interactive Claude Code session and send a message to trigger an update.' : 'Connect Claude to report usage, context, and activity. This adds local status-line and activity hooks to your Claude settings and preserves your existing commands.'}</p>
 
-      {status.reason && !(status.usageConnected && status.activityConnected) && <p>{status.reason}</p>}
+      {status.usageConnected && status.telemetry?.updatedAt && <p>Usage limits: {status.telemetry.hasLimits ? 'reported' : 'not reported by Claude'}. Context: {status.telemetry.hasContext ? 'reported' : 'not reported by Claude'}.{status.telemetry.stale ? ' Waiting for a new Claude update.' : ''}</p>}
+
+      {status.usageConnected && !status.telemetry?.updatedAt && !status.needsRepair && <p>If it stays empty, check for project settings overriding Claude’s status line and that both apps use the same CLAUDE_CONFIG_DIR. On macOS, connect from the copy installed in Applications.</p>}
+
+      {status.reason && <p>{status.reason}</p>}
 
       {status.legacy && <p>Your existing connection is preserved.</p>}
 
-      {status.canConnect && !(status.usageConnected && status.activityConnected) && <button disabled={pending} onClick={() => void change(true)}>{pending ? 'Connecting…' : 'Connect Claude'}</button>}
+      {status.canConnect && (status.needsRepair || !(status.usageConnected && status.activityConnected)) && <button disabled={pending} onClick={() => void change(true)}>{pending ? 'Connecting…' : status.needsRepair ? 'Repair connection' : 'Connect Claude'}</button>}
 
       {status.canDisconnect && <button disabled={pending} onClick={() => void change(false)}>{pending ? 'Disconnecting…' : 'Disconnect Claude'}</button>}
 

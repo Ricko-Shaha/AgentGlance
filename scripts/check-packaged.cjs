@@ -27,6 +27,7 @@ async function main() {
   }
   executable = path.resolve(executable);
   await fs.access(executable);
+  await require('./check-packaged-worker.cjs').checkPackagedWorker(executable);
   const env = { ...process.env, STATUSLINE_TEST_EXECUTABLE: executable };
   delete env.ELECTRON_RUN_AS_NODE;
   const child = spawn(process.execPath, [path.join(root, 'tests', 'desktop-smoke.cjs')], { cwd: root, env, stdio: 'inherit', windowsHide: true });

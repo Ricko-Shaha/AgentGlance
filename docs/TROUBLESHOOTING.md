@@ -78,11 +78,18 @@ Read the message under **Info → Claude telemetry**. Common causes are:
 
 - Claude Code has no detectable local sign-in.
 - AgentGlance is running from a Windows portable launcher or Linux AppImage. Install it at a stable location first.
+- macOS launched the app from a temporary AppTranslocation location. Move it to Applications and launch that copy before connecting.
 - Existing Claude settings have an unsupported structure, changed during setup, or conflict with a previous integration. AgentGlance preserves them instead of overwriting the conflict.
 
-Successful connection does not generate a task or force a provider response. Continue normal Claude work and wait for a status-line or hook event. Reopen the Claude session if it has not reloaded settings. A working legacy bridge is recognized and left in place; it may use the earlier source-tree disconnect commands rather than the desktop app's disconnect button. Those commands are documented in [Development](DEVELOPMENT.md).
+**Configured** means the observers are saved in Claude's user settings. **Receiving status-line updates** means AgentGlance has actually received a recent update; Info shows its timestamp and whether it includes usage limits and context. An older observation is shown as **Last update**, not a live connection. Info refreshes these diagnostics every five seconds while open.
 
-If you moved or removed the connected AgentGlance executable, restore the installation at its previous location if possible, disconnect from that running copy, then reconnect from the intended installed location. Avoid replacing an entire Claude settings file to fix one observer: unrelated status-line commands and hooks may need to be retained.
+If configured but no update has arrived, use an interactive Claude Code session and send a normal message. Status lines do not run in non-interactive `claude -p` sessions. Some fields remain empty until the first API response. Claude normally reloads settings automatically; reopen the session if it has not loaded the observer. Check for a project `statusLine` setting overriding the user setting, and check that Claude and AgentGlance use the same `CLAUDE_CONFIG_DIR` if you customized it. See Claude's [status-line documentation](https://code.claude.com/docs/en/statusline) and [settings precedence](https://code.claude.com/docs/en/settings).
+
+If timestamps update but usage limits or context say **not reported by Claude**, the worker is receiving data but those fields are absent. Update Claude Code and check the session/account support for the missing fields. AgentGlance does not fill them with guessed values. On macOS, Keychain-only sign-in has no credentials-file fallback for account limits; status-line observations are needed for those limits.
+
+If you moved the connected app, launch the intended installed copy and use **Repair connection** when offered. It replaces the app-owned worker paths while retaining the original status line and unrelated hooks. User edits that conflict with a repair remain untouched. Restart Claude afterward. Avoid replacing an entire Claude settings file to fix one observer.
+
+A working legacy bridge is recognized and left in place; it may use the earlier source-tree disconnect commands rather than the desktop app's disconnect button. Those commands are documented in [Development](DEVELOPMENT.md).
 
 ## A downloaded package is missing or cannot launch
 

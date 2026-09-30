@@ -2,6 +2,12 @@
 
 This records notable source changes. A version entry does not imply that GitHub Releases or every platform's binary package has been published.
 
+## 2.1.3
+
+- Restore the compact widget's original position after closing panels near screen edges, in both layouts. Moving an expanded widget also moves its remembered compact position.
+- Distinguish configured Claude telemetry from received observations, and repair app-owned commands after moving an installation.
+- Exercise Claude telemetry with each platform's actual packaged executable and ASAR worker in native CI.
+
 ## 2.1.2
 
 - Fit the vertical rail's height to its assistant cards and controls, removing the empty gap. Longer lists scroll within a 560-pixel maximum.

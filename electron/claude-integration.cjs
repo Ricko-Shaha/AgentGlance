@@ -53,6 +53,9 @@ function workerCommand(mode, configDirectory, options = {}) {
     throw new Error('Install AgentGlance in a stable application location before connecting Claude telemetry. Portable launchers do not provide a persistent worker executable.');
   }
   const executable = options.executablePath || process.execPath;
+  if (platform === 'darwin' && /\/AppTranslocation\//.test(executable)) {
+    throw new Error('Move AgentGlance into Applications and launch that copy before connecting Claude telemetry. This copy is running from a temporary macOS location.');
+  }
   if (options.isPackaged === true && !options.workerPath) throw new Error('Packaged setup requires an explicit worker path.');
   const runtimePath = platform === 'win32' ? path.win32 : path.posix;
   const workerPath = options.workerPath || runtimePath.join(options.appPath || path.join(__dirname, '..'), 'electron', 'claude-worker.cjs');
@@ -106,6 +109,28 @@ async function signedIn(options, loc) {
   return result.providers.some(provider => provider.id === 'claude');
 }
 
+// Report receipt separately from configuration. Never send captured payloads,
+// session identifiers, or commands to the renderer for connection diagnostics.
+async function telemetryStatus(configDirectory, now = Date.now()) {
+  const empty = { updatedAt: null, hasLimits: false, hasContext: false, stale: false };
+  try {
+    const filename = path.join(configDirectory, 'statusline-usage', 'latest.json');
+    const stat = await fs.stat(filename);
+    if (!stat.isFile() || stat.size > 65536) return empty;
+    const capture = JSON.parse(await fs.readFile(filename, 'utf8'));
+    const time = typeof capture?.updatedAt === 'string' ? Date.parse(capture.updatedAt) : NaN;
+    if (capture?.schemaVersion !== 1 || !Array.isArray(capture.limits) || !Number.isFinite(time) || time > now + 60000) return empty;
+    const percent = value => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100;
+    const tokens = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
+    return {
+      updatedAt: new Date(time).toISOString(),
+      hasLimits: capture.limits.some(limit => ['five_hour', 'seven_day'].includes(limit?.id) && percent(limit.usedPercent)),
+      hasContext: Boolean(capture.context && (percent(capture.context.usedPercent) || tokens(capture.context.usedTokens))),
+      stale: now - time > 5 * 60 * 1000,
+    };
+  } catch { return empty; }
+}
+
 async function state(options = {}) {
   const loc = locations(options);
   const settingsText = await fs.readFile(loc.settings, 'utf8').catch(error => { if (error.code === 'ENOENT') return null; throw error; });
@@ -121,9 +146,16 @@ async function state(options = {}) {
   const legacyActivity = Boolean(activityLegacy?.command && EVENTS.every(event => hasHook(settings, event, activityLegacy.command)));
   const authenticated = await signedIn(options, loc);
   let reason = null;
-  try { workerCommand('usage', loc.configDirectory, options); } catch (error) { reason = error.message; }
+  let currentUsageCommand;
+  let currentActivityCommand;
+  try {
+    currentUsageCommand = workerCommand('usage', loc.configDirectory, options);
+    currentActivityCommand = workerCommand('activity', loc.configDirectory, options);
+  } catch (error) { reason = error.message; }
   if (!authenticated) reason = 'Sign in to Claude Code on this device before connecting telemetry.';
   const owned = Boolean(manifest?.schemaVersion === 1 && manifest.active !== false);
+  const needsRepair = Boolean(owned && (ownUsage || ownActivity) && currentUsageCommand &&
+    (manifest.usageCommand !== currentUsageCommand || manifest.activityCommand !== currentActivityCommand));
   return { loc, settings, settingsText, manifest, status: {
     provider: 'claude', signedIn: authenticated,
     installed: (ownUsage || legacyUsage) && (ownActivity || legacyActivity),
@@ -132,6 +164,8 @@ async function state(options = {}) {
     legacy: legacyUsage || legacyActivity,
     canConnect: !reason,
     canDisconnect: owned,
+    needsRepair,
+    telemetry: await telemetryStatus(loc.configDirectory, options.now ?? Date.now()),
     configDirectory: loc.configDirectory,
     reason,
   } };
@@ -144,11 +178,15 @@ async function connectIntegration(options = {}) {
   const { loc, settings, status } = current;
   if (!status.canConnect) throw new Error(status.reason);
   // An already working legacy bridge remains exactly as the user installed it.
-  if (status.usageConnected && status.activityConnected) return status;
+  if (status.usageConnected && status.activityConnected && !status.needsRepair) return status;
   const originalText = current.settingsText;
   const usageCommand = workerCommand('usage', loc.configDirectory, options);
   const activityCommand = workerCommand('activity', loc.configDirectory, options);
   const prior = current.manifest;
+  if (status.needsRepair && settings.statusLine?.command === prior.usageCommand &&
+      JSON.stringify(settings.statusLine) !== JSON.stringify(prior.installedStatusLine)) {
+    throw new Error('The status line was edited after setup. Preserve or restore those edits manually before repairing the connection.');
+  }
   if (prior?.active !== false && prior?.usageCommand && settings.statusLine?.command !== prior.usageCommand) {
     throw new Error('The Claude status line changed after setup. Disconnect the previous integration before reconnecting; your edits were preserved.');
   }
