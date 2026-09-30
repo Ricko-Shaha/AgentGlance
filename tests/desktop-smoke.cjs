@@ -90,8 +90,9 @@ const root = path.resolve(__dirname, '..');
     await expect.poll(async () => page.evaluate(() => {
       const last = document.querySelector('.signals')?.lastElementChild;
       const footer = document.querySelector('footer');
-      return last && footer ? footer.getBoundingClientRect().top - last.getBoundingClientRect().bottom : 1000;
-    })).toBeLessThanOrEqual(8);
+      const gap = last && footer ? footer.getBoundingClientRect().top - last.getBoundingClientRect().bottom : 1000;
+      return gap >= 0 && gap <= 8;
+    })).toBe(true);
     const fittedHeight = (await bounds()).height;
     assert.ok(fittedHeight >= 240 && fittedHeight < 560, 'Two assistants should shrink the vertical rail to content');
     assert.equal(await page.evaluate(() => {
