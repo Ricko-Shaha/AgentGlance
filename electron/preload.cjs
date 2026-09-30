@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld('statusline', Object.freeze({
   setLayout: (value) => ipcRenderer.invoke('statusline:set-layout', value),
   setDetailsOpen: (value) => ipcRenderer.invoke('statusline:set-details-open', value),
   setTaskContextOpen: (value) => ipcRenderer.invoke('statusline:set-task-context-open', value),
+  setRailHeight: (value) => ipcRenderer.invoke('statusline:set-rail-height', value),
   setAlwaysOnTop: (value) => ipcRenderer.invoke('statusline:set-always-on-top', value),
   openProvider: (providerId) => ipcRenderer.invoke('statusline:open-provider', providerId),
   minimize: () => ipcRenderer.invoke('statusline:minimize'),

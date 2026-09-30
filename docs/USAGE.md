@@ -19,7 +19,7 @@ The horizontal toolbar starts at **560 × 44 pixels**. Additional providers may 
 
 Hover over controls for their labels and over a usage ring for reset details. Escape closes the usage or Info panel. In the horizontal layout, task lists expand independently and scroll separately. The horizontal window grows to 292 pixels high while a task list is open; usage details or Info add 288 pixels.
 
-The vertical layout is a **44 × 560 pixel rail**, similar in width to a desktop taskbar. Selecting tasks, usage details, or Info opens one **316-pixel drawer to the right**, making the window 360 pixels wide. The rail keeps its left edge in place when there is room. Near the screen edge, the app moves enough to keep the entire drawer in the usable desktop. Closing the drawer returns to the narrow rail.
+The vertical layout is a **44-pixel-wide rail**, similar in width to a desktop taskbar. Selecting tasks, usage details, or Info opens one **316-pixel drawer to the right**, making the window 360 pixels wide. The rail keeps its left edge in place when there is room. Near the screen edge, the app moves enough to keep the entire drawer in the usable desktop. Closing the drawer returns to the narrow rail. Its height fits the assistant cards and controls, up to 560 pixels; longer lists scroll.
 
 To recover a hidden widget, select **Show AgentGlance** from the tray or open the application shortcut again. **Quit AgentGlance** in the tray menu exits fully. On pure Wayland without an X11 display, a framed vertical window replaces the toolbar and pin/layout controls are unavailable; see [Installation](INSTALLATION.md#display-server-behavior).
 

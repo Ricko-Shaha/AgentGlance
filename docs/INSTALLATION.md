@@ -1,6 +1,6 @@
 # Installation
 
-This guide describes AgentGlance **2.1.1**. Start with the [project overview](../README.md), then see [Using AgentGlance](USAGE.md) for the controls.
+This guide describes AgentGlance **2.1.2**. Start with the [project overview](../README.md), then see [Using AgentGlance](USAGE.md) for the controls.
 
 ## Choose a package
 
@@ -20,7 +20,7 @@ Windows builds currently have no publisher certificate. macOS builds use an ad-h
 
 ### Installer — recommended for Claude telemetry
 
-1. Run `AgentGlance-Setup-2.1.1-x64.exe`.
+1. Run `AgentGlance-Setup-2.1.2-x64.exe`.
 2. Choose the installation location in the setup wizard. Setup uses a per-user installation and is configured to create desktop and Start-menu shortcuts.
 3. Open **AgentGlance** from one of those shortcuts.
 
@@ -28,7 +28,7 @@ Keep the installed application at that location if you connect Claude telemetry.
 
 ### Portable app
 
-1. Place `AgentGlance-2.1.1.exe` in a folder you intend to keep.
+1. Place `AgentGlance-2.1.2.exe` in a folder you intend to keep.
 2. Open it directly. You may create a Windows shortcut to that EXE yourself.
 
 The portable package does not run an installation wizard or create shortcuts automatically. It can display detected accounts, activity, and available usage. **Connect Claude** requires the installed app because the portable launcher does not provide a persistent worker location. An already configured telemetry bridge may still supply observations.
@@ -89,7 +89,7 @@ For a hidden window, missing measurements, or setup errors, continue to [Trouble
 
 ## Upgrading from Statusline
 
-The application was renamed in AgentGlance 2.1.0. Current Windows packages are `AgentGlance-2.1.1.exe` and `AgentGlance-Setup-2.1.1-x64.exe`. Update manually created shortcuts to the new executable; an old Statusline shortcut can still launch an older copy.
+The application was renamed in AgentGlance 2.1.0. Current Windows packages are `AgentGlance-2.1.2.exe` and `AgentGlance-Setup-2.1.2-x64.exe`. Update manually created shortcuts to the new executable; an old Statusline shortcut can still launch an older copy.
 
 When no AgentGlance preferences exist, the app reads the previous `Statusline/preferences.json` from the operating system's application-data directory. Subsequent preference changes are saved under AgentGlance. Existing Claude integration settings are not moved by this preference import.
 

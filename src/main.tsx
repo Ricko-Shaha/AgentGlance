@@ -46,7 +46,7 @@ type Capabilities = { manualDrag: boolean; layouts: boolean; pin: boolean; messa
 
 type ClaudeIntegration = { signedIn: boolean; installed: boolean; usageConnected: boolean; activityConnected: boolean; legacy: boolean; canConnect: boolean; canDisconnect: boolean; reason: string | null };
 
-declare global { interface Window { statusline?: { getCapabilities?(): Promise<Capabilities>; getClaudeIntegration?(): Promise<ClaudeIntegration>; connectClaude?(): Promise<ClaudeIntegration>; disconnectClaude?(): Promise<ClaudeIntegration>; getSnapshot(): Promise<Snapshot>; subscribe(callback: (snapshot: Snapshot) => void): () => void; refresh(): Promise<Snapshot>; setCompact(value: boolean): Promise<void> | void; setLayout?(value: Layout): Promise<void>; setDetailsOpen?(value: boolean): Promise<void>; setTaskContextOpen?(value: boolean): Promise<void>; setAlwaysOnTop(value: boolean): Promise<void> | void; startWindowDrag(point: { x: number; y: number }): Promise<void>; moveWindowDrag(point: { x: number; y: number }): Promise<void>; endWindowDrag(): Promise<void>; minimize(): void; close(): void; getPreferences(): Promise<Preferences>; openProvider(id: string): Promise<void> } } }
+declare global { interface Window { statusline?: { getCapabilities?(): Promise<Capabilities>; getClaudeIntegration?(): Promise<ClaudeIntegration>; connectClaude?(): Promise<ClaudeIntegration>; disconnectClaude?(): Promise<ClaudeIntegration>; getSnapshot(): Promise<Snapshot>; subscribe(callback: (snapshot: Snapshot) => void): () => void; refresh(): Promise<Snapshot>; setCompact(value: boolean): Promise<void> | void; setLayout?(value: Layout): Promise<void>; setDetailsOpen?(value: boolean): Promise<void>; setTaskContextOpen?(value: boolean): Promise<void>; setRailHeight?(value: number): Promise<void>; setAlwaysOnTop(value: boolean): Promise<void> | void; startWindowDrag(point: { x: number; y: number }): Promise<void>; moveWindowDrag(point: { x: number; y: number }): Promise<void>; endWindowDrag(): Promise<void>; minimize(): void; close(): void; getPreferences(): Promise<Preferences>; openProvider(id: string): Promise<void> } } }
 
 const bridge = window.statusline;
 
@@ -444,6 +444,27 @@ function App() {
   }
 
   const providers = snapshot?.providers ?? [];
+  const signalsRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (layout !== 'vertical' || !bridge?.setRailHeight) return;
+    const signals = signalsRef.current;
+    if (!signals) return;
+    const measure = () => {
+      const body = signals.parentElement!;
+      const widget = signals.closest('.widget')!;
+      const spacing = getComputedStyle(body);
+      const border = getComputedStyle(widget);
+      const rows = Array.from(signals.children);
+      const contentHeight = rows.reduce((sum, row) => sum + row.getBoundingClientRect().height, 0);
+      const height = contentHeight + parseFloat(spacing.paddingTop) + parseFloat(spacing.paddingBottom)
+        + parseFloat(border.borderTopWidth) + parseFloat(border.borderBottomWidth);
+      void bridge.setRailHeight?.(height).catch(() => {});
+    };
+    const observer = new ResizeObserver(measure);
+    for (const child of signals.children) observer.observe(child);
+    measure();
+    return () => observer.disconnect();
+  }, [layout, providers.length]);
 
   const verticalTask = providers.find(provider => provider.id === verticalTaskId);
 
@@ -485,7 +506,7 @@ function App() {
 
     <div className="widget-body">
 
-      <section className="signals" aria-label="Assistant running status and usage">
+      <section ref={signalsRef} className="signals" aria-label="Assistant running status and usage">
 
         {providers.map(provider => {
 

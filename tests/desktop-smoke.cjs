@@ -87,13 +87,23 @@ const root = path.resolve(__dirname, '..');
     await expect.poll(async () => (await bounds()).height).toBe(44);
     await page.getByTitle('Vertical layout', { exact: true }).click();
     await expect.poll(async () => (await bounds()).width).toBe(44);
-    assert.equal((await bounds()).height, 560);
+    await expect.poll(async () => page.evaluate(() => {
+      const last = document.querySelector('.signals')?.lastElementChild;
+      const footer = document.querySelector('footer');
+      return last && footer ? footer.getBoundingClientRect().top - last.getBoundingClientRect().bottom : 1000;
+    })).toBeLessThanOrEqual(8);
+    const fittedHeight = (await bounds()).height;
+    assert.ok(fittedHeight >= 240 && fittedHeight < 560, 'Two assistants should shrink the vertical rail to content');
+    assert.equal(await page.evaluate(() => {
+      const last = document.querySelector('.signals').lastElementChild.getBoundingClientRect();
+      return last.bottom <= document.querySelector('footer').getBoundingClientRect().top;
+    }), true, 'Controls must not overlap assistant cards');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 44);
     await page.screenshot({ path: 'artifacts/signal-vertical.png' });
     const railBounds = await bounds();
     await page.getByTestId('task-context-toggle').first().click();
     await expect.poll(async () => (await bounds()).width).toBe(360);
-    assert.equal((await bounds()).height, 560);
+    assert.equal((await bounds()).height, fittedHeight, 'Opening right must retain the fitted rail height');
     assert.equal((await bounds()).x, railBounds.x, 'Expanding right should preserve the rail position when space permits');
     const drawer = page.getByTestId('vertical-drawer');
     await expect(drawer).toBeVisible();

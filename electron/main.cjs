@@ -43,6 +43,7 @@ let rendererUrl;
 let windowDrag;
 let taskContextOpen = false;
 let detailsOpen = false;
+let verticalRailHeight = 240;
 
 function horizontalHeight() {
   return (taskContextOpen ? 292 : 44) + (detailsOpen ? 288 : 0);
@@ -55,7 +56,8 @@ function verticalWidth() {
 function resizePanels() {
   if (nativeWayland || !mainWindow || mainWindow.isDestroyed()) return;
   const current = mainWindow.getBounds();
-  const size = preferences.layout === 'horizontal' ? { height: horizontalHeight() } : { width: verticalWidth() };
+  const size = preferences.layout === 'horizontal' ? { height: horizontalHeight() } : { width: verticalWidth(), height: verticalRailHeight };
+  if (Object.entries(size).every(([key, value]) => current[key] === value)) return;
   // Keep the rail's left edge fixed unless the current display needs more room.
   mainWindow.setBounds(boundedSize({ ...current, ...size }, current), true);
 }
@@ -146,7 +148,7 @@ function setLayout(value) {
   if (nativeWayland) throw new Error('Layout is managed by your Wayland desktop.');
   const current = mainWindow.getBounds();
   const width = value === 'vertical' ? verticalWidth() : 560;
-  const height = value === 'vertical' ? 560 : horizontalHeight();
+  const height = value === 'vertical' ? verticalRailHeight : horizontalHeight();
   mainWindow.setMinimumSize(value === 'vertical' ? 44 : 360, value === 'vertical' ? 240 : 44);
   mainWindow.setBounds(boundedSize({ x: current.x, y: current.y, width, height }, current), true);
   preferences.layout = value;
@@ -215,6 +217,11 @@ function registerHandlers() {
     taskContextOpen = value;
     resizePanels();
   });
+  handle('set-rail-height', (value) => {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 10000) throw new TypeError('Invalid rail height');
+    verticalRailHeight = Math.max(240, Math.min(560, Math.ceil(value)));
+    if (preferences.layout === 'vertical') resizePanels();
+  });
   handle('set-always-on-top', (value) => {
     if (typeof value !== 'boolean') throw new TypeError('Always on top must be a boolean');
     if (nativeWayland) throw new Error('Pinning is managed by your Wayland desktop.');
@@ -277,7 +284,7 @@ async function createWindow() {
   const icon = appIcon();
   mainWindow = new BrowserWindow({
     width: horizontal ? 560 : nativeWayland ? 320 : verticalWidth(),
-    height: horizontal ? horizontalHeight() : nativeWayland ? 500 : 560,
+    height: horizontal ? horizontalHeight() : nativeWayland ? 500 : verticalRailHeight,
     minWidth: horizontal ? 360 : nativeWayland ? 280 : 44,
     minHeight: horizontal ? 44 : 240,
     title: 'AgentGlance',

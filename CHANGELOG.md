@@ -2,6 +2,11 @@
 
 This records notable source changes. A version entry does not imply that GitHub Releases or every platform's binary package has been published.
 
+## 2.1.2
+
+- Fit the vertical rail's height to its assistant cards and controls, removing the empty gap. Longer lists scroll within a 560-pixel maximum.
+- Update the GitHub Actions helpers to Node 24-compatible versions.
+
 ## 2.1.1
 
 - Make the floating vertical layout a 44-pixel rail with task, usage, and Info drawers opening to the right; keep expanded panels inside the display's usable area. Pure Wayland retains its framed compositor-managed window.

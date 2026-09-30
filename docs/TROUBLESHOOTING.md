@@ -1,6 +1,6 @@
 # Troubleshooting
 
-These steps apply to AgentGlance **2.1.1**. See [Installation](INSTALLATION.md), [Using AgentGlance](USAGE.md), and the [project overview](../README.md) for normal setup and behavior.
+These steps apply to AgentGlance **2.1.2**. See [Installation](INSTALLATION.md), [Using AgentGlance](USAGE.md), and the [project overview](../README.md) for normal setup and behavior.
 
 ## The widget disappeared
 
