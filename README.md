@@ -63,7 +63,7 @@ Development requires Node.js 22.12+; CI uses Node.js 24. Packaged applications i
 | macOS Intel / Apple Silicon | DMG, ZIP | Native CI checks passed |
 | Linux x64 / arm64 | AppImage, DEB | Native CI checks passed |
 
-[Version 2.1.2 passed all five native CI jobs](https://github.com/Ricko-Shaha/AgentGlance/actions/runs/36695269874): unit tests, interface build, desktop checks, packaging and packaged-window checks. Linux desktop checks use X11 with Openbox; pure Wayland and every desktop environment have not been validated. The [desktop workflow](.github/workflows/desktop.yml) uploads the resulting packages as artifacts. It does not automatically publish GitHub Releases. Windows packages are unsigned; macOS signing is ad hoc, without notarization.
+[Version 2.1.3 passed all five native CI jobs](https://github.com/Ricko-Shaha/AgentGlance/actions/runs/36721286256): unit tests, interface build, desktop checks, packaging, packaged-window checks and Claude's bundled telemetry worker. Worker checks use synthetic data; they do not verify every user's CLI configuration or sign-in. Linux desktop checks use X11 with Openbox; pure Wayland and every desktop environment have not been validated. The [desktop workflow](.github/workflows/desktop.yml) uploads the resulting packages as artifacts. It does not automatically publish GitHub Releases. Windows packages are unsigned; macOS signing is ad hoc, without notarization.
 
 AgentGlance was previously named Statusline. Existing `STATUSLINE_*` environment variables and `statusline-*` Claude integration directories retain their compatibility names; see [upgrading from Statusline](docs/INSTALLATION.md#upgrading-from-statusline).
 

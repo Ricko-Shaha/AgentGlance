@@ -1,6 +1,6 @@
 # Development
 
-Use **Node.js 24** and npm; CI uses Node 24. Work on the native operating system you intend to package. Windows has been exercised locally, and version 2.1.2 passed [all five native CI targets](https://github.com/Ricko-Shaha/AgentGlance/actions/runs/36695269874). Linux checks cover X11/Openbox; pure Wayland remains unverified. See [Installation](INSTALLATION.md) for end-user setup.
+Use **Node.js 24** and npm; CI uses Node 24. Work on the native operating system you intend to package. Windows has been exercised locally, and version 2.1.3 passed [all five native CI targets](https://github.com/Ricko-Shaha/AgentGlance/actions/runs/36721286256). Linux checks cover X11/Openbox; pure Wayland remains unverified. See [Installation](INSTALLATION.md) for end-user setup.
 
 The source repository is [Ricko-Shaha/AgentGlance](https://github.com/Ricko-Shaha/AgentGlance). AgentGlance retains the existing `STATUSLINE_*` environment-variable names and `statusline-*` Claude integration directory names for compatibility with earlier Statusline installations. Use those existing names in commands; do not substitute an `AGENTGLANCE_` prefix.
 
