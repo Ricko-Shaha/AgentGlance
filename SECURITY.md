@@ -16,6 +16,6 @@ Provide the affected version, platform, impact, and a minimal reproduction using
 - Make configuration changes explicit, reversible, and limited to owned integration entries.
 - Treat the development preview as a local tool; do not expose it on a public network.
 
-Windows packages currently lack publisher signing; macOS packages lack Developer ID signing and notarization. Version 2.1.1 passed native build and desktop checks on Windows, macOS and Linux; these checks do not provide publisher signing or notarization. These limitations should remain visible rather than being bypassed through disabled operating-system protections.
+Windows packages currently lack publisher signing; macOS packages lack Developer ID signing and notarization. Version 2.1.2 passed native build and desktop checks on Windows, macOS and Linux; these checks do not provide publisher signing or notarization. These limitations should remain visible rather than being bypassed through disabled operating-system protections.
 
 No long-term support or security-backport schedule is promised. Reports should identify the affected revision and, where practical, whether the issue reproduces with the current source.

@@ -86,7 +86,7 @@ If you moved or removed the connected AgentGlance executable, restore the instal
 
 ## A downloaded package is missing or cannot launch
 
-Version 2.1.1 passed [native CI builds and desktop checks](https://github.com/Ricko-Shaha/AgentGlance/actions/runs/36693234631) for Windows x64, macOS x64/arm64, and Linux x64/arm64. Linux checks use X11/Openbox; results do not cover every desktop environment or pure Wayland. Download the artifact matching your platform and architecture from a successful run. CI uploads are not automatic GitHub Releases.
+Version 2.1.2 passed [native CI builds and desktop checks](https://github.com/Ricko-Shaha/AgentGlance/actions/runs/36695269874) for Windows x64, macOS x64/arm64, and Linux x64/arm64. Linux checks use X11/Openbox; results do not cover every desktop environment or pure Wayland. Download the artifact matching your platform and architecture from a successful run. CI uploads are not automatic GitHub Releases.
 
 Windows builds are unsigned; macOS builds have no Developer ID signature or notarization. Organization policies may block them. Use your organization's supported software process rather than disabling operating-system protections. For Linux AppImages, confirm executable permission and your distribution's AppImage/FUSE support. If available, the DEB package is an alternative on a supported Debian-based desktop.
 

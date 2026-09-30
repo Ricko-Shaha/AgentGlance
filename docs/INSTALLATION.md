@@ -10,7 +10,7 @@ This guide describes AgentGlance **2.1.2**. Start with the [project overview](..
 | macOS | Intel x64 or Apple Silicon arm64 | DMG or ZIP | Native CI checks passed |
 | Linux | x64 or arm64 | AppImage or DEB | Native CI checks passed |
 
-Version 2.1.1 passed native build and desktop checks for every listed target in [this CI run](https://github.com/Ricko-Shaha/AgentGlance/actions/runs/36693234631). Packages are available as that run's artifacts; this is separate from publishing a GitHub Release. Choose the architecture that matches your computer. Packaged apps include their runtime; you do not need Node.js or a source checkout.
+Version 2.1.2 passed native build and desktop checks for every listed target in [this CI run](https://github.com/Ricko-Shaha/AgentGlance/actions/runs/36695269874). Packages are available as that run's artifacts; this is separate from publishing a GitHub Release. Choose the architecture that matches your computer. Packaged apps include their runtime; you do not need Node.js or a source checkout.
 
 Use a package attached to a published release, if one is available. The repository's **Actions → Desktop builds** workflow also uploads artifacts after successful jobs. Extract the downloaded artifact ZIP to obtain the platform package. CI artifacts are separate from GitHub Releases: this workflow does not automatically publish a release. If no suitable artifact exists, see [Development](DEVELOPMENT.md) for native build instructions.
 
