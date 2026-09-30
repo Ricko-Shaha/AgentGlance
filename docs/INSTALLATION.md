@@ -91,4 +91,6 @@ For a hidden window, missing measurements, or setup errors, continue to [Trouble
 
 AgentGlance 2.1.0 is the renamed application. New Windows packages are `AgentGlance-2.1.0.exe` and `AgentGlance-Setup-2.1.0-x64.exe`. Update manually created shortcuts to the new executable; an old Statusline shortcut can still launch an older copy.
 
+When no AgentGlance preferences exist, the app reads the previous `Statusline/preferences.json` from the operating system's application-data directory. Subsequent preference changes are saved under AgentGlance. Existing Claude integration settings are not moved by this preference import.
+
 The `STATUSLINE_*` environment variables and Claude integration directories named `statusline-usage`, `statusline-activity`, and `statusline-integration` remain compatibility names. Do not rename those variables or folders by hand. Before removing a connected older application, disconnect its owned Claude observers from that application, then reconnect from the new stable AgentGlance installation. Existing working legacy observers remain recognized.

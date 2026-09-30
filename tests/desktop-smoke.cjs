@@ -71,7 +71,7 @@ const root = path.resolve(__dirname, '..');
     await expect.poll(async () => (await bounds()).height).toBe(292);
     await expect(page.getByTestId('task-context')).toHaveCount(snapshot.providers.reduce((count, provider) => count + provider.tasks.length, 0));
     await page.screenshot({ path: 'artifacts/signal-expanded.png' });
-    console.log('Rendered providers:', JSON.stringify(snapshot.providers.map(provider => ({ name: provider.name, processes: provider.processCount, sessions: provider.tasks.length, firstSessions: provider.tasks.slice(0, 4).map(task => task.label) }))));
+    console.log('Rendered providers:', JSON.stringify(snapshot.providers.map(provider => ({ name: provider.name, processes: provider.processCount, sessions: provider.tasks.length, ...(fixture ? { firstSessions: provider.tasks.slice(0, 4).map(task => task.label) } : {}) }))));
     await page.getByTestId('usage-meter').first().click();
     await expect.poll(async () => (await bounds()).height).toBe(580);
     await page.getByTitle('Close details').click();
