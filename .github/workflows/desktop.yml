@@ -1,0 +1,111 @@
+name: Desktop builds
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: ${{ matrix.platform }} / ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2022
+            platform: win
+            arch: x64
+          - runner: macos-15-intel
+            platform: mac
+            arch: x64
+          - runner: macos-15
+            platform: mac
+            arch: arm64
+          - runner: ubuntu-24.04
+            platform: linux
+            arch: x64
+          - runner: ubuntu-24.04-arm
+            platform: linux
+            arch: arm64
+    env:
+      STATUSLINE_SMOKE_ISOLATED_HOST: '1'
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      STATUSLINE_TEST_X11: ${{ matrix.platform == 'linux' && '1' || '0' }}
+      ELECTRON_OZONE_PLATFORM_HINT: x11
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Linux desktop dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          npx playwright install-deps chromium
+          sudo apt-get install -y xvfb xauth x11-utils openbox libfuse2t64 rpm
+      - name: Unit tests
+        run: npm test
+      - name: Build interface
+        run: npm run build
+      - name: Prepare Electron Linux sandbox helper
+        if: matrix.platform == 'linux'
+        run: |
+          sudo chown root:root node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+      - name: Native desktop smoke
+        if: matrix.platform != 'linux'
+        run: npm run test:desktop
+      - name: Linux desktop smoke under X11
+        if: matrix.platform == 'linux'
+        run: xvfb-run --auto-servernum --server-args='-screen 0 1280x1024x24' bash scripts/linux-desktop-test.sh npm run test:desktop
+      - name: Package native artifacts
+        run: node scripts/package.cjs --platform ${{ matrix.platform }} --arch ${{ matrix.arch }}
+      - name: Packaged desktop smoke
+        if: matrix.platform != 'linux'
+        run: npm run test:packaged -- --arch ${{ matrix.arch }}
+      - name: Prepare packaged Linux sandbox helper
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          package_dir=release/linux-unpacked
+          if [ '${{ matrix.arch }}' = arm64 ]; then package_dir=release/linux-arm64-unpacked; fi
+          sudo chown root:root "$package_dir/chrome-sandbox"
+          sudo chmod 4755 "$package_dir/chrome-sandbox"
+      - name: Packaged Linux smoke under X11
+        if: matrix.platform == 'linux'
+        run: xvfb-run --auto-servernum --server-args='-screen 0 1280x1024x24' bash scripts/linux-desktop-test.sh npm run test:packaged -- --arch ${{ matrix.arch }}
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentglance-${{ matrix.platform }}-${{ matrix.arch }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.zip
+            release/*.AppImage
+            release/*.deb
+      - name: Upload desktop screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-smoke-${{ matrix.platform }}-${{ matrix.arch }}
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            artifacts/*.png
+            artifacts/openbox.log

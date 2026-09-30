@@ -1,0 +1,114 @@
+{
+  "name": "agentglance",
+  "version": "2.1.0",
+  "private": true,
+  "description": "A floating traffic-signal widget for AI usage and context.",
+  "author": "Ricko-Shaha",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "node scripts/dev.cjs",
+    "dev:web": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "start": "electron .",
+    "test": "node --test tests/*.test.cjs",
+    "test:desktop": "node tests/desktop-smoke.cjs",
+    "claude:connect": "node scripts/install-claude-bridge.cjs --install",
+    "claude:disconnect": "node scripts/install-claude-bridge.cjs --restore",
+    "claude:activity:connect": "node scripts/install-claude-activity.cjs --install",
+    "claude:activity:disconnect": "node scripts/install-claude-activity.cjs --restore",
+    "preview": "vite preview --host 127.0.0.1",
+    "icons": "node scripts/create-icon.cjs",
+    "dist": "npm run build && node scripts/package.cjs",
+    "dist:win": "npm run build && node scripts/package.cjs --platform win --arch x64",
+    "dist:mac": "npm run build && node scripts/package.cjs --platform mac",
+    "dist:linux": "npm run build && node scripts/package.cjs --platform linux",
+    "dist:unpacked": "npm run build && node scripts/package.cjs --dir",
+    "test:packaged": "node scripts/check-packaged.cjs"
+  },
+  "build": {
+    "appId": "app.agentglance.desktop",
+    "productName": "AgentGlance",
+    "afterPack": "scripts/after-pack.cjs",
+    "compression": "normal",
+    "publish": null,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "assets/icon.ico",
+      "signExecutable": false
+    },
+    "portable": {
+      "artifactName": "AgentGlance-${version}.exe"
+    },
+    "nsis": {
+      "artifactName": "AgentGlance-Setup-${version}-${arch}.exe",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "artifactName": "AgentGlance-${version}-mac-${arch}.${ext}",
+      "icon": "assets/icon.png",
+      "category": "public.app-category.productivity",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "notarize": false
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "artifactName": "AgentGlance-${version}-linux-${arch}.${ext}",
+      "icon": "assets/icon.png",
+      "executableName": "agentglance",
+      "category": "Utility",
+      "synopsis": "Local AI activity and per-task context widget",
+      "maintainer": "AgentGlance contributors",
+      "vendor": "AgentGlance"
+    }
+  },
+  "dependencies": {
+    "lucide-react": "^1.48.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1"
+  },
+  "homepage": "https://github.com/Ricko-Shaha/AgentGlance",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ricko-Shaha/AgentGlance.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ricko-Shaha/AgentGlance/issues"
+  }
+}
