@@ -5,7 +5,8 @@ This records notable source changes. A version entry does not imply that GitHub 
 ## 2.1.1
 
 - Make the floating vertical layout a 44-pixel rail with task, usage, and Info drawers opening to the right; keep expanded panels inside the display's usable area. Pure Wayland retains its framed compositor-managed window.
-- Correct dependency lockfile consistency for fresh installs and CI setup. Native macOS/Linux validation remains pending.
+- Correct dependency lockfile consistency for fresh installs and CI setup.
+- Pass all five [native CI build and desktop checks](https://github.com/Ricko-Shaha/AgentGlance/actions/runs/36693234631): Windows x64, macOS x64/arm64, and Linux x64/arm64 under X11/Openbox.
 
 ## 2.1.0
 

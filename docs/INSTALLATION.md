@@ -6,11 +6,11 @@ This guide describes AgentGlance **2.1.1**. Start with the [project overview](..
 
 | System | Architecture | Package | Validation status |
 | --- | --- | --- | --- |
-| Windows | x64 | Portable EXE or setup EXE | Built and tested on Windows |
-| macOS | Intel x64 or Apple Silicon arm64 | DMG or ZIP | Build targets configured; native validation still required |
-| Linux | x64 or arm64 | AppImage or DEB | Build targets configured; native validation still required |
+| Windows | x64 | Portable EXE or setup EXE | Local and native CI checks passed |
+| macOS | Intel x64 or Apple Silicon arm64 | DMG or ZIP | Native CI checks passed |
+| Linux | x64 or arm64 | AppImage or DEB | Native CI checks passed |
 
-The macOS and Linux entries describe configured targets, not a promise that downloadable packages have been published or tested. Choose the architecture that matches your computer. Packaged apps include their runtime; you do not need Node.js or a source checkout.
+Version 2.1.1 passed native build and desktop checks for every listed target in [this CI run](https://github.com/Ricko-Shaha/AgentGlance/actions/runs/36693234631). Packages are available as that run's artifacts; this is separate from publishing a GitHub Release. Choose the architecture that matches your computer. Packaged apps include their runtime; you do not need Node.js or a source checkout.
 
 Use a package attached to a published release, if one is available. The repository's **Actions → Desktop builds** workflow also uploads artifacts after successful jobs. Extract the downloaded artifact ZIP to obtain the platform package. CI artifacts are separate from GitHub Releases: this workflow does not automatically publish a release. If no suitable artifact exists, see [Development](DEVELOPMENT.md) for native build instructions.
 
@@ -41,7 +41,7 @@ When a native package is available, choose **x64** for an Intel Mac or **arm64**
 
 For a DMG, open the image and copy **AgentGlance.app** into **Applications**. For a ZIP, extract it and move **AgentGlance.app** into Applications. Launch that copy, rather than a temporary copy in the mounted image or extraction folder. Keep it in place before connecting Claude telemetry.
 
-AgentGlance provides native app, edit, and window menus and a Dock icon. These targets are configured but have not yet been validated on native macOS hardware. Signing and notarization limitations are described above.
+AgentGlance provides native app, edit, and window menus and a Dock icon. Both Intel and Apple Silicon targets passed native CI build and desktop checks. Signing and notarization limitations are described above.
 
 ## Linux
 
@@ -59,7 +59,7 @@ Save the matching `.AppImage` in a persistent folder. Enable **Allow executing f
 
 With an X11 display available, including XWayland, AgentGlance requests X11 and offers its floating toolbar, dragging, resizing, pinning, and layout switching.
 
-In a pure Wayland session without an X11 display, AgentGlance uses a framed vertical window. The compositor controls moving and resizing; pinning and layout switching are disabled. **Info** explains the limitation. Tray visibility depends on the desktop environment's tray support. Linux packages and desktop behavior still need native validation.
+In a pure Wayland session without an X11 display, AgentGlance uses a framed vertical window. The compositor controls moving and resizing; pinning and layout switching are disabled. **Info** explains the limitation. Tray visibility depends on the desktop environment's tray support. Linux x64 and arm64 passed CI checks under X11/Openbox. Pure Wayland and other desktop environments have not been tested by that workflow.
 
 ## First launch and account detection
 
