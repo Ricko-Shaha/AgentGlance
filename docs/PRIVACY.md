@@ -27,6 +27,8 @@ Window preferences are stored in Electron's application-data directory. Claude i
 
 The rename to AgentGlance preserves the Claude directory names `statusline-usage`, `statusline-activity`, and `statusline-integration`, along with `STATUSLINE_*` environment variables, for compatibility. These names do not indicate a separate telemetry service.
 
+If the renamed app has no preferences yet, it can read the old Statusline preference file from application data. New preference writes go to AgentGlance's directory, leaving the old file unchanged. Explicit test profiles do not import those legacy preferences.
+
 The restore manifest retains the previous status-line setting/command so it can be forwarded and restored. Any sensitive values already embedded in that command remain part of the saved configuration; it should not be shared publicly.
 
 The renderer receives provider status, counts, saved task labels, times, and usage/context measurements. Credentials, raw command lines, full session paths, and raw conversation text are not included in status snapshots. The Claude connection status also identifies the configuration directory internally for setup; the app's current UI does not display it as a task label.

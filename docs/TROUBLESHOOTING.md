@@ -1,6 +1,6 @@
 # Troubleshooting
 
-These steps apply to AgentGlance **2.1.0**. See [Installation](INSTALLATION.md), [Using AgentGlance](USAGE.md), and the [project overview](../README.md) for normal setup and behavior.
+These steps apply to AgentGlance **2.1.1**. See [Installation](INSTALLATION.md), [Using AgentGlance](USAGE.md), and the [project overview](../README.md) for normal setup and behavior.
 
 ## The widget disappeared
 
@@ -17,6 +17,8 @@ Since version 2.0.2, the app moves the widget back inside the usable desktop aft
 Drag the grip or an empty toolbar area. Buttons, task lists, and details panels have their own interactions and do not start a window drag. Screen edges and taskbars bound its final position.
 
 The pin button controls **Always on top**. If it is disabled on Linux, open **Info**: a pure Wayland session without an X11 display uses a framed vertical window with compositor-controlled movement and resizing. Pinning and layout switching are unavailable there. An X11 or XWayland display enables the floating-toolbar behavior. See [Installation](INSTALLATION.md#display-server-behavior).
+
+In the floating vertical layout, the collapsed rail is 44 pixels wide. Tasks and details open in a drawer to its right. If the rail is near a display's right edge, opening that drawer moves the window left enough to keep it visible. This is expected work-area clamping, not a failed drag.
 
 ## An assistant does not appear
 

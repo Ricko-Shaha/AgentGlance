@@ -26,6 +26,9 @@ const root = path.resolve(__dirname, '..');
   try {
     assert.equal(path.resolve(await desktop.evaluate(({ app }) => app.getPath('userData'))).toLowerCase(), profile.toLowerCase());
     const page = await desktop.firstWindow();
+    // firstWindow can resolve before loadFile finishes, especially in a signed
+    // macOS bundle. Settle initial navigation before replacing fixture IPC.
+    await page.waitForURL(url => url.protocol === 'file:' && url.pathname.endsWith('/index.html'), { waitUntil: 'load', timeout: 30000 });
     if (fixture && packaged) {
       // Packaged Electron rejects Node preloads. Only fresh, explicitly marked
       // CI hosts may install transport doubles after native package startup.
@@ -83,9 +86,37 @@ const root = path.resolve(__dirname, '..');
     await page.getByTitle('Close details').click();
     await expect.poll(async () => (await bounds()).height).toBe(44);
     await page.getByTitle('Vertical layout', { exact: true }).click();
-    await expect.poll(async () => (await bounds()).width).toBe(320);
-    assert.equal((await bounds()).height, 500);
+    await expect.poll(async () => (await bounds()).width).toBe(44);
+    assert.equal((await bounds()).height, 560);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 44);
     await page.screenshot({ path: 'artifacts/signal-vertical.png' });
+    const railBounds = await bounds();
+    await page.getByTestId('task-context-toggle').first().click();
+    await expect.poll(async () => (await bounds()).width).toBe(360);
+    assert.equal((await bounds()).height, 560);
+    assert.equal((await bounds()).x, railBounds.x, 'Expanding right should preserve the rail position when space permits');
+    const drawer = page.getByTestId('vertical-drawer');
+    await expect(drawer).toBeVisible();
+    assert.ok((await drawer.boundingBox()).x >= 44, 'Vertical details belong to the right of the rail');
+    await expect(page.getByTestId('task-context')).toHaveCount(snapshot.providers[0].tasks.length);
+    if (snapshot.providers.length > 1) {
+      await page.getByTestId('task-context-toggle').nth(1).click();
+      await expect(page.getByTestId('task-context-toggle').first()).toHaveAttribute('aria-expanded', 'false');
+      await expect(page.getByTestId('task-context')).toHaveCount(snapshot.providers[1].tasks.length);
+    }
+    await page.getByTitle('Close task context', { exact: true }).click();
+    await expect.poll(async () => (await bounds()).width).toBe(44);
+    await page.getByTestId('usage-meter').first().click();
+    await expect.poll(async () => (await bounds()).width).toBe(360);
+    await expect(drawer).toBeVisible();
+    await page.screenshot({ path: 'artifacts/signal-vertical-expanded.png' });
+    await page.keyboard.press('Escape');
+    await expect.poll(async () => (await bounds()).width).toBe(44);
+    await page.getByTitle('How to read the signals').click();
+    await expect.poll(async () => (await bounds()).width).toBe(360);
+    await expect(page.getByTestId('claude-connection')).toBeVisible();
+    await page.getByTitle('Close signal guide').click();
+    await expect.poll(async () => (await bounds()).width).toBe(44);
     await page.getByTitle('Horizontal layout', { exact: true }).click();
     await expect.poll(async () => (await bounds()).height).toBe(44);
     await page.getByTitle('How to read the signals').click();
@@ -112,7 +143,10 @@ const root = path.resolve(__dirname, '..');
       await window.statusline.moveWindowDrag({ x: start.x, y: area.y + area.height + 20 });
       await window.statusline.endWindowDrag();
     }, { before: beforeDrop, area: workArea });
-    await expect.poll(async () => { const b = await bounds(); return b.y + b.height; }).toBe(workArea.y + workArea.height);
+    // Cocoa can settle a borderless window a couple of pixels inside the Dock
+    // boundary. Recovery must remain contained and close to that boundary.
+    await expect.poll(async () => { const b = await bounds(); return workArea.y + workArea.height - (b.y + b.height); }).toBeGreaterThanOrEqual(0);
+    assert.ok(workArea.y + workArea.height - ((await bounds()).y + (await bounds()).height) <= 4, 'Recovered widget should settle at the usable desktop edge');
     assert.equal((await bounds()).height, 44, 'Taskbar recovery must preserve the compact height');
     // Restoring and display changes must also recover a window left off-screen.
     await desktop.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].hide());

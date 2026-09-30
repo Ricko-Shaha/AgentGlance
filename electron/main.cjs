@@ -48,9 +48,16 @@ function horizontalHeight() {
   return (taskContextOpen ? 292 : 44) + (detailsOpen ? 288 : 0);
 }
 
+function verticalWidth() {
+  return taskContextOpen || detailsOpen ? 360 : 44;
+}
+
 function resizePanels() {
-  if (nativeWayland || preferences.layout !== 'horizontal') return;
-  mainWindow.setBounds(boundedSize({ ...mainWindow.getBounds(), height: horizontalHeight() }), true);
+  if (nativeWayland || !mainWindow || mainWindow.isDestroyed()) return;
+  const current = mainWindow.getBounds();
+  const size = preferences.layout === 'horizontal' ? { height: horizontalHeight() } : { width: verticalWidth() };
+  // Keep the rail's left edge fixed unless the current display needs more room.
+  mainWindow.setBounds(boundedSize({ ...current, ...size }, current), true);
 }
 
 function dragPoint(value) {
@@ -103,8 +110,8 @@ function appIcon() {
   return nativeImage.createFromBitmap(pixels, { width: size, height: size });
 }
 
-function boundedSize(bounds) {
-  const area = screen.getDisplayMatching(bounds).workArea;
+function boundedSize(bounds, displayBounds = bounds) {
+  const area = screen.getDisplayMatching(displayBounds).workArea;
   const width = Math.min(bounds.width, area.width);
   const height = Math.min(bounds.height, area.height);
   return {
@@ -138,10 +145,10 @@ function setLayout(value) {
   if (value !== 'vertical' && value !== 'horizontal') throw new TypeError('Unknown widget layout');
   if (nativeWayland) throw new Error('Layout is managed by your Wayland desktop.');
   const current = mainWindow.getBounds();
-  const width = value === 'vertical' ? 320 : 560;
-  const height = value === 'vertical' ? 500 : horizontalHeight();
-  mainWindow.setMinimumSize(value === 'vertical' ? 280 : 360, value === 'vertical' ? 240 : 44);
-  mainWindow.setBounds(boundedSize({ x: current.x + current.width - width, y: current.y, width, height }), true);
+  const width = value === 'vertical' ? verticalWidth() : 560;
+  const height = value === 'vertical' ? 560 : horizontalHeight();
+  mainWindow.setMinimumSize(value === 'vertical' ? 44 : 360, value === 'vertical' ? 240 : 44);
+  mainWindow.setBounds(boundedSize({ x: current.x, y: current.y, width, height }, current), true);
   preferences.layout = value;
   preferences.compact = true;
   savePreferences();
@@ -269,9 +276,9 @@ async function createWindow() {
   const horizontal = preferences.layout === 'horizontal';
   const icon = appIcon();
   mainWindow = new BrowserWindow({
-    width: horizontal ? 560 : 320,
-    height: horizontal ? horizontalHeight() : 500,
-    minWidth: horizontal ? 360 : 280,
+    width: horizontal ? 560 : nativeWayland ? 320 : verticalWidth(),
+    height: horizontal ? horizontalHeight() : nativeWayland ? 500 : 560,
+    minWidth: horizontal ? 360 : nativeWayland ? 280 : 44,
     minHeight: horizontal ? 44 : 240,
     title: 'AgentGlance',
     backgroundColor: '#00000000',
@@ -294,7 +301,7 @@ async function createWindow() {
   });
   if (compact && !nativeWayland) {
     const area = screen.getPrimaryDisplay().workArea;
-    mainWindow.setPosition(area.x + area.width - (horizontal ? 584 : 344), area.y + 72);
+    mainWindow.setBounds(boundedSize({ ...mainWindow.getBounds(), x: area.x + area.width - mainWindow.getBounds().width - 24, y: area.y + 72 }));
   }
   mainWindow.setMenu(null);
   mainWindow.on('blur', finishWindowDrag);

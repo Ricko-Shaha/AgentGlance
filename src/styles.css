@@ -295,3 +295,74 @@ body{min-width:280px}
 .horizontal .empty-state>button{font-size:9px;padding:4px 6px}
 .horizontal .connection-error,.horizontal .notice{position:absolute;top:47px;left:9px;right:9px;z-index:5;margin:0;padding:8px 10px;background:#302b23}
 .horizontal .legend{grid-template-columns:repeat(4,1fr)}
+
+/* Vertical taskbar: the rail stays fixed while one information pane opens right. */
+body{min-width:0}
+.widget-panels[hidden],.rail-drawer[hidden]{display:none}
+.vertical.widget{position:relative;display:block;width:100%;height:100vh;min-height:0;max-width:none;margin:0;border:1px solid #ffffff13;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#23252a,#1c1e22)}
+.vertical .widget-body{position:static;width:42px;height:100%;min-height:0;padding:29px 0 163px}
+.vertical .widget-drag-grip{position:absolute;left:5px;top:3px;width:32px;height:22px;border:0;border-radius:5px;z-index:3}
+.vertical .widget-drag-grip svg{width:16px;height:15px}
+.vertical .signals{display:flex;flex-direction:column;gap:0;justify-content:flex-start;align-items:stretch;width:42px;height:100%;overflow-x:hidden;overflow-y:auto;scrollbar-width:none;overscroll-behavior:contain}
+.vertical .signals::-webkit-scrollbar{display:none}
+.vertical .provider-column{position:relative;flex:none;width:42px;min-width:0;padding:5px 3px 20px;border-bottom:1px solid #ffffff09}
+.vertical .provider-column>.signal-housing{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;width:36px;min-height:0;margin:0;padding:0;border:0;border-radius:5px;background:none;box-shadow:none}
+.vertical .signal-housing::before{display:none}
+.vertical .signal-housing.is-selected{background:#ffffff05}
+.vertical .provider-heading.process-light{flex-direction:column;justify-content:center;align-items:center;width:34px;min-width:0;height:29px;min-height:0;margin:0;gap:0}
+.vertical .provider-name,.vertical .process-label{display:none}
+.vertical .process-light .lamp-rim{padding:0;background:none;box-shadow:none;border:0}
+.vertical .process-light .lamp{width:28px;height:28px;border:1.5px solid var(--lamp-color);background:rgba(var(--lamp-rgb),.08);box-shadow:0 0 7px rgba(var(--lamp-rgb),.1);overflow:visible}
+.vertical .process-light .lamp::before,.vertical .process-light .lamp::after{display:none}
+.vertical .process-light .provider-logo{width:19px;height:19px}
+.vertical .usage-meters{display:flex;flex-direction:column;gap:5px;flex:none;width:36px;padding:0}
+.vertical .usage-meter{position:relative;display:grid;grid-template-columns:1fr;grid-template-rows:9px 28px 9px;justify-items:center;gap:0;width:36px;height:46px;padding:0;border-radius:5px;text-align:center}
+.vertical .usage-meter:hover{background:#ffffff07}
+.vertical .meter-label{grid-column:1;grid-row:1;font-size:7px;line-height:9px;color:#8f9db0}
+.vertical .usage-ring{display:block;grid-column:1;grid-row:2;width:28px;height:28px;fill:none;transform:rotate(-90deg);stroke-width:2}
+.vertical .meter-value{position:absolute;top:9px;left:3px;display:flex;align-items:center;justify-content:center;width:30px;height:28px;font-size:8px;font-weight:600;letter-spacing:-.35px;line-height:1}
+.vertical .stale-mark{font-size:7px;margin:0}
+.vertical .meter-track,.vertical .full-reset-countdown,.vertical .meter-reset time{display:none}
+.vertical .meter-reset{display:block;grid-column:1;grid-row:3;width:36px;height:9px;font-size:7px;line-height:9px;white-space:nowrap;color:#95a1b2;font-variant-numeric:tabular-nums}
+.vertical .compact-reset-countdown{display:block}
+.vertical .provider-column>.provider-tasks{padding:0;margin:0;border:0;background:none}
+.vertical .provider-column .task-section-heading{position:absolute;bottom:1px;left:8px;display:flex;justify-content:center;width:26px;height:18px;min-height:0;margin:0;padding:0;border-radius:4px}
+.vertical .provider-column .task-section-heading:hover,.vertical .provider-column .task-section-heading[aria-expanded=true]{background:#ffffff09}
+.vertical .task-heading-label>span{display:none}
+.vertical .task-heading-label{gap:0}
+.vertical .task-section-heading .task-heading-label svg{transform:rotate(-90deg);width:12px;height:12px}
+.vertical .task-section-heading[aria-expanded=true] .task-heading-label svg{transform:rotate(90deg);color:#d8e2ef}
+.vertical .titlebar{position:absolute;left:0;right:auto;top:auto;bottom:3px;width:42px;height:104px;min-height:0;padding:0;border:0;justify-content:center;z-index:5}
+.vertical .app-title{display:none}
+.vertical .window-controls{display:flex;flex-direction:column;gap:0;width:32px}
+.vertical .window-controls button{width:32px;height:26px;min-height:26px}
+.vertical .window-controls svg{width:13px;height:13px}
+.vertical footer{position:absolute;left:5px;top:auto;bottom:108px;display:flex;flex-direction:column;gap:0;width:32px;height:52px;min-height:0;margin:0;border:0;justify-content:center}
+.vertical footer .info-button,.vertical footer .sync button{display:flex;align-items:center;justify-content:center;width:32px;height:26px}
+.vertical footer .info-button span,.vertical footer time{display:none}
+.vertical .rail-drawer{position:absolute;left:43px;top:0;bottom:0;width:calc(100% - 43px);min-width:0;padding:14px 13px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#424957 transparent;border-left:1px solid #ffffff0d;background:linear-gradient(145deg,#21252c,#1b1e24);cursor:auto;user-select:text;-webkit-app-region:no-drag}
+.vertical .rail-drawer .details,.vertical .rail-drawer .help-panel{width:100%;margin:0;padding:0;border:0;background:none;border-radius:0;font-size:11px}
+.vertical .rail-drawer .detail-heading{min-height:24px;margin-bottom:13px;gap:7px}
+.vertical .rail-drawer .detail-heading strong{font-size:12px}
+.vertical .rail-drawer .detail-heading .provider-logo{width:19px;height:19px}
+.vertical .rail-drawer .detail-heading button{width:24px;height:24px;justify-content:center;border-radius:5px;flex-shrink:0}
+.vertical .rail-drawer .detail-heading button:hover{background:#ffffff09;color:#fff}
+.vertical .rail-drawer .provider-tasks{margin:0;padding:0;border:0;background:none}
+.vertical .rail-drawer .task-list:not([hidden]){max-height:none;overflow:visible;margin:0}
+.vertical .rail-drawer .task-row{padding:13px 0}
+.vertical .rail-drawer .task-label{font-size:11px}
+.vertical .rail-drawer .task-row time{font-size:8px}
+.vertical .rail-drawer .task-token-count{font-size:9px}
+.vertical .rail-drawer .task-scope{padding:0 0 13px;font-size:9px;line-height:1.5;color:#8c99ac}
+.vertical .rail-drawer .task-context-reading{margin-top:6px}
+.vertical .rail-drawer .connection-error,.vertical .rail-drawer .notice{position:static;margin:0 0 12px;padding:9px;font-size:10px}
+.vertical .rail-drawer .details dl{display:block}
+.vertical .rail-drawer .legend{grid-template-columns:1fr 1fr}
+.vertical .empty-state{width:42px;padding:14px 4px;text-align:center;white-space:normal}
+.vertical .empty-state strong{font-size:8px;line-height:1.6;overflow-wrap:anywhere}
+.vertical .empty-state p,.vertical .empty-state>button,.vertical .empty-lights{display:none}
+.vertical button:focus-visible{outline-offset:0}
+
+.vertical .rail-idle{position:absolute;left:44px;right:0;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:26px;color:#7f8c9e;background:#1b1e24;border-left:1px solid #ffffff0d;cursor:auto}
+.vertical .rail-idle strong{font-size:13px;font-weight:500;color:#bac6d6}
+.vertical .rail-idle p{font-size:11px;line-height:1.7}

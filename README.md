@@ -2,7 +2,7 @@
 
 A small floating desktop widget for the AI assistants you use. See activity, account usage and reset countdowns in a **44-pixel toolbar**, then expand an assistant to inspect context for individual tasks.
 
-Version **2.1.0** · [Ricko-Shaha/AgentGlance on GitHub](https://github.com/Ricko-Shaha/AgentGlance)
+Version **2.1.1** · [Ricko-Shaha/AgentGlance on GitHub](https://github.com/Ricko-Shaha/AgentGlance)
 
 ![Compact widget with example Codex and Claude data](docs/images/toolbar.png)
 
@@ -17,6 +17,8 @@ Version **2.1.0** · [Ricko-Shaha/AgentGlance on GitHub](https://github.com/Rick
 - **Task context:** independent, collapsed task lists with saved titles and each task's reported token usage and capacity.
 - **Only detected connections:** supported local CLI sign-ins or configured API credentials. No separate widget account.
 - **Desktop controls:** drag, pin, minimize, tray restore, layout switching, and recovery from taskbar or display-edge drops.
+
+Prefer a vertical taskbar? Switch to the **44 × 560 pixel rail**. Tasks, usage details, and Info open in a drawer to its right, expanding the window to 360 pixels wide while keeping it inside the usable desktop.
 
 Usage colors indicate the percentage **used**: green below 50%, yellow from 50%, orange from 75%, red from 90%. Activity and quota colors are independent. Missing measurements remain unavailable.
 

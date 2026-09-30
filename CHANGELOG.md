@@ -2,9 +2,15 @@
 
 This records notable source changes. A version entry does not imply that GitHub Releases or every platform's binary package has been published.
 
+## 2.1.1
+
+- Make the floating vertical layout a 44-pixel rail with task, usage, and Info drawers opening to the right; keep expanded panels inside the display's usable area. Pure Wayland retains its framed compositor-managed window.
+- Correct dependency lockfile consistency for fresh installs and CI setup. Native macOS/Linux validation remains pending.
+
 ## 2.1.0
 
 - Rename the application from Statusline to AgentGlance and establish the public `Ricko-Shaha/AgentGlance` repository. Retain legacy `STATUSLINE_*` environment variables and `statusline-*` Claude integration directories for compatibility.
+- Import existing Statusline preferences on the first renamed launch without changing the old preference file.
 - Add local GLM and DeepSeek API-credential detection through supported OpenCode configurations or exact official Claude-compatible endpoints. Shared-client activity remains unknown; no quota or task feed is claimed.
 - Add Qwen Code API-credential and native/official-entrypoint process detection. Quota and task-context integrations remain unavailable.
 - Add installation, usage, provider, troubleshooting, development, privacy, contribution, and security documentation.

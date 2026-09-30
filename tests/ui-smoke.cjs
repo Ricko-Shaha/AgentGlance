@@ -172,6 +172,37 @@ snapshot.providers[1].tasks = [{ id: 'claude-one', label: 'Review operating syst
     await page.setViewportSize({ width: 560, height: 292 });
     await expect(cards.last().locator('.tasks-empty')).toHaveText('No task context observed yet');
 
+    await cards.last().getByTestId('task-context-toggle').click();
+    await page.getByTitle('Vertical layout', { exact: true }).click();
+    await page.setViewportSize({ width: 44, height: 560 });
+    expect(await geometry()).toEqual({ width: 44, height: 560 });
+    expect(await signals.evaluate(node => node.scrollHeight > node.clientHeight)).toBe(true);
+    await expect(page.getByTitle('Horizontal layout', { exact: true })).toBeInViewport();
+    await expect(page.getByTitle('Refresh usage')).toBeInViewport();
+    await cards.last().getByTestId('task-context-toggle').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: 'artifacts/vertical-rail-fixture.png' });
+    await cards.last().getByTestId('task-context-toggle').click();
+    await page.setViewportSize({ width: 360, height: 560 });
+    const drawer = page.getByTestId('vertical-drawer');
+    await expect(drawer).toBeVisible();
+    await expect(drawer.locator('.tasks-empty')).toHaveText('No task context observed yet');
+    expect((await drawer.boundingBox()).x).toBeGreaterThanOrEqual(44);
+    expect(await geometry()).toEqual({ width: 360, height: 560 });
+    await codexToggle.scrollIntoViewIfNeeded();
+    await codexToggle.click();
+    await expect(drawer.getByTestId('task-context')).toHaveCount(snapshot.providers[0].tasks.length);
+    await expect(cards.last().getByTestId('task-context-toggle')).toHaveAttribute('aria-expanded', 'false');
+    await page.screenshot({ path: 'artifacts/vertical-drawer-fixture.png' });
+    await codex.nth(0).click();
+    await expect(page.getByTestId('task-context')).toHaveCount(0);
+    await expect(drawer).toBeVisible();
+    await page.keyboard.press('Escape');
+    await page.setViewportSize({ width: 44, height: 560 });
+    await expect(drawer).toBeHidden();
+    expect(await geometry()).toEqual({ width: 44, height: 560 });
+    await page.getByTitle('Horizontal layout', { exact: true }).click();
+    await page.setViewportSize({ width: 560, height: 44 });
+
     await page.unroute('**/api/status');
     await page.route('**/api/status', route => route.fulfill({ json: { ...snapshot, providers: [] } }));
     await page.reload();
